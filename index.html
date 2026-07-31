@@ -8,7 +8,9 @@
 <style>
 /* =====================================================================
    VERTIX · animação em loop para TVs
-   Ciclo de 9s: o anel se desenha → VTX aparece → brilho passa → repete.
+   Ciclo de 15s: o anel se desenha (1,9s) → VTX aparece (2,3s) → a logo
+   fica PARADA → um brilho passa aos 5s → fica parada de novo até 13,8s
+   → fade e repete. Cerca de 10s dos 15 sao com a logo estatica.
    Para o tema escuro: troque  <body class="light">  por  <body class="dark">
    (ou aperte a tecla D com a página aberta).
    ===================================================================== */
@@ -20,7 +22,11 @@
 }
 
 :root {
-  --dur: 9s;          /* duração de um ciclo completo */
+  --dur: 15s;         /* duração de um ciclo completo.  Aumentar este número
+                         estica TUDO junto (entrada, brilho e pausa) na mesma
+                         proporção — a pausa cresce, mas a entrada fica mais
+                         lenta também. Para mexer só na pausa, veja os
+                         comentários em @keyframes cycle, lá embaixo. */
   --tamanho: 52vmin;  /* tamanho da logo (52% da altura da TV) */
 }
 
@@ -140,25 +146,28 @@ body.light .glow { display: none; }
 
 /* =====================  linha do tempo  ========================== */
 
+/* As porcentagens abaixo são fração do ciclo de 15s.
+   Ao lado de cada uma está o instante em segundos, para facilitar. */
+
 @keyframes ringDraw {
-  0%   { --sweep: 0%;   opacity: 0; animation-timing-function: cubic-bezier(.42,0,.18,1); }
-  2%   { opacity: 1; }
-  21%  { --sweep: 102%; }
-  100% { --sweep: 102%; opacity: 1; }
+  0%     { --sweep: 0%;   opacity: 0; animation-timing-function: cubic-bezier(.42,0,.18,1); }
+  1.2%   { opacity: 1; }                    /* 0,18s */
+  12.6%  { --sweep: 102%; }                 /* 1,89s — anel completo */
+  100%   { --sweep: 102%; opacity: 1; }
 }
 
 @keyframes lettersIn {
-  0%, 13% { opacity: 0; transform: translateY(1.4%) scale(1.05);
-            animation-timing-function: cubic-bezier(.22,.9,.28,1); }
-  25%     { opacity: 1; transform: none; }
-  100%    { opacity: 1; transform: none; }
+  0%, 7.8% { opacity: 0; transform: translateY(1.4%) scale(1.05);
+             animation-timing-function: cubic-bezier(.22,.9,.28,1); }   /* 1,17s */
+  15%      { opacity: 1; transform: none; } /* 2,25s — logo inteira no ar */
+  100%     { opacity: 1; transform: none; }
 }
 
 @keyframes shine {
-  0%, 33%   { background-position: 170% 0; opacity: 0; }
-  35%       { opacity: 1; }
-  47%       { opacity: 1; }
-  50%       { background-position: -70% 0; opacity: 0; }
+  0%, 33.3% { background-position: 170% 0; opacity: 0; }   /* 5,00s */
+  34.7%     { opacity: 1; }                                /* 5,20s */
+  42%       { opacity: 1; }                                /* 6,30s */
+  43.3%     { background-position: -70% 0; opacity: 0; }    /* 6,50s */
   100%      { background-position: -70% 0; opacity: 0; }
 }
 
@@ -167,15 +176,18 @@ body.light .glow { display: none; }
   56%      { transform: scale(1.018); }
 }
 
+/* AQUI é onde se regula o tempo de logo parada.
+   O 92% é o instante em que a logo começa a sumir (0,92 × 15s = 13,8s).
+   Aumentar esse número = mais tempo parada. Diminuir = menos. */
 @keyframes cycle {
-  0%, 87%   { opacity: 1; transform: scale(1); }
-  97%, 100% { opacity: 0; transform: scale(1.03); }
+  0%, 92%   { opacity: 1; transform: scale(1); }      /* 13,80s */
+  98%, 100% { opacity: 0; transform: scale(1.03); }   /* 14,70s */
 }
 
 @keyframes glow {
-  0%, 12%   { opacity: 0; }
-  30%, 80%  { opacity: 1; }
-  97%, 100% { opacity: 0; }
+  0%, 8%    { opacity: 0; }
+  20%, 88%  { opacity: 1; }
+  98%, 100% { opacity: 0; }
 }
 
 @keyframes drift {
@@ -205,7 +217,7 @@ body.light .glow { display: none; }
 
 <script>
 // Congela um quadro exato do ciclo, para conferir a arte:
-//   abra a pagina com  ?t=3.5   (3,5 segundos do ciclo de 9s)
+//   abra a pagina com  ?t=3.5   (3,5 segundos do ciclo de 15s)
 var _t = new URLSearchParams(location.search).get('t');
 if (_t !== null) {
   window.addEventListener('load', function () {
